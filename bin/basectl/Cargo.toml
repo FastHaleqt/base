@@ -13,7 +13,9 @@ workspace = true
 
 [dependencies]
 anyhow = { workspace = true }
+tracing = { workspace = true, features = ["std"] }
 basectl-cli = { workspace = true }
-rustls = { workspace = true, features = ["ring"] }
 clap = { workspace = true, features = ["derive"] }
+rustls = { workspace = true, features = ["ring"] }
 tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+tracing-subscriber = { workspace = true, features = ["fmt"] }
