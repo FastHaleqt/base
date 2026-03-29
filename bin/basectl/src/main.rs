@@ -4,6 +4,18 @@ mod cli;
 
 use basectl_cli::{ChainConfig, ViewId, run_app, run_app_with_view, run_flashblocks_json};
 use clap::Parser;
+use tracing::Level;
+
+/// Install a stderr-only tracing subscriber for `--json` flashblocks mode so structured logs
+/// (Toast + `warn!` in `basectl-cli`) do not pollute stdout JSON lines.
+fn init_flashblocks_json_tracing() {
+    let _ = tracing_subscriber::fmt()
+        .with_writer(std::io::stderr)
+        .with_max_level(Level::WARN)
+        .with_target(false)
+        .without_time()
+        .try_init();
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -16,7 +28,10 @@ async fn main() -> anyhow::Result<()> {
 
     match cli.command {
         Some(cli::Commands::Config) => run_app_with_view(chain_config, ViewId::Config).await,
-        Some(cli::Commands::Flashblocks { json: true }) => run_flashblocks_json(chain_config).await,
+        Some(cli::Commands::Flashblocks { json: true }) => {
+            init_flashblocks_json_tracing();
+            run_flashblocks_json(chain_config).await
+        }
         Some(cli::Commands::Flashblocks { json: false }) => {
             run_app_with_view(chain_config, ViewId::Flashblocks).await
         }
