@@ -4,6 +4,7 @@ use anyhow::Result;
 use base_alloy_flashblocks::Flashblock;
 use base_consensus_genesis::SystemConfig;
 use tokio::sync::{mpsc, watch};
+use tracing::warn;
 
 use super::{App, Resources, ViewId, views::create_view};
 use crate::{
@@ -131,9 +132,14 @@ pub async fn run_flashblocks_json(config: ChainConfig) -> Result<()> {
     let (_, url_rx) = watch::channel(config.flashblocks_ws.to_string());
     tokio::spawn(run_flashblock_ws(url_rx, tx, toast_tx));
 
+    // JSON lines go to stdout only. Toast and other diagnostics use `tracing` (the `basectl`
+    // binary installs a stderr subscriber before calling this when `--json` is set).
     tokio::spawn(async move {
         while let Some(toast) = toast_rx.recv().await {
-            eprintln!("connection status: {}", toast.message);
+            warn!(
+                message = %toast.message,
+                "connection status",
+            );
         }
     });
 
