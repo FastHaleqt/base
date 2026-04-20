@@ -8,6 +8,7 @@ use testcontainers::{
     core::{IntoContainerPort, Mount, WaitFor},
     runners::AsyncRunner,
 };
+use url::Host;
 
 use super::config::L1ContainerConfig;
 use crate::{
@@ -95,9 +96,7 @@ impl LighthouseBeaconContainer {
 /// Lighthouse validator client container wrapper.
 #[derive(Debug)]
 pub struct LighthouseValidatorContainer {
-    #[allow(dead_code)]
     container: ContainerAsync<GenericImage>,
-    #[allow(dead_code)]
     name: String,
 }
 
@@ -143,6 +142,16 @@ impl LighthouseValidatorContainer {
             .await?;
 
         Ok(Self { container, name })
+    }
+
+    /// Returns the Docker/container name assigned to this validator client.
+    pub fn container_name(&self) -> &str {
+        &self.name
+    }
+
+    /// Returns the host identifier used to reach this container from the test harness.
+    pub async fn host(&self) -> Result<Host> {
+        self.container.get_host().await.map_err(Into::into)
     }
 }
 
