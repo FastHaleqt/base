@@ -1,6 +1,6 @@
 //! L1 stack orchestration (Reth + Lighthouse).
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use eyre::{Result, WrapErr};
 use url::Url;
@@ -27,9 +27,7 @@ pub struct L1StackConfig {
 pub struct L1Stack {
     reth: RethContainer,
     beacon: LighthouseBeaconContainer,
-    #[allow(dead_code)]
     validator: LighthouseValidatorContainer,
-    #[allow(dead_code)]
     jwt_path: PathBuf,
 }
 
@@ -81,6 +79,16 @@ impl L1Stack {
     /// Returns a reference to the Lighthouse beacon container.
     pub const fn beacon(&self) -> &LighthouseBeaconContainer {
         &self.beacon
+    }
+
+    /// Returns a reference to the Lighthouse validator container.
+    pub const fn validator(&self) -> &LighthouseValidatorContainer {
+        &self.validator
+    }
+
+    /// Path to the JWT secret file shared between Reth and Lighthouse.
+    pub fn jwt_path(&self) -> &Path {
+        &self.jwt_path
     }
 
     /// Returns the public RPC URL of the Reth container.
